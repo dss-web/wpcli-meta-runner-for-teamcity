@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="PHP - Run WP-CLI">
+  <description>Run WP-CLI</description>
+  <settings>
+    <parameters>
+      <param name="system.exec.dir" value="" spec="text description='Directory where WP-CLI will be run (if empty - current working directory will be used)' display='normal' label='Execute in directory:' validationMode='any'" />
+      <param name="system.wpcli.command" value="core install" spec="text description='WP-CLI command' display='normal' label='wpcli command:' validationMode='not_empty'" />
+      <param name="system.wpcli.params" value="" spec="text description='Optional WP-CLI parameters' display='normal' label='WP-CLI parameters:' validationMode='any'" />
+    </parameters>
+    <build-runners>
+      <runner id="RUNNER_14" name="" type="Ant">
+        <parameters>
+          <param name="build-file"><![CDATA[<project name="Run WP-CLI">
+
+<condition property="wpcli.exec.dir" value="${teamcity.build.workingDir}">
+   <not>  
+      <matches pattern=".+" string="${exec.dir}"/>
+   </not>
+</condition>
+<property name="wpcli.exec.dir" value="${exec.dir}" />
+<property name="wpcli.params" value="" />
+
+<target name="runWPCLI" depends="getWPCLI">
+  <exec executable="php" failonerror="true">
+    <arg line="-f &quot;${wpcli.exec.dir}/wp-cli.phar&quot; ${wpcli.command} ${wpcli.params}"/>
+  </exec>
+</target>
+
+<target name="getWPCLI" depends="create-wpcli-dest-dir">
+  <get src="https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar" dest="${wpcli.exec.dir}" verbose="on" skipexisting="false"/>
+</target>
+
+<target name="create-wpcli-dest-dir">
+    <mkdir dir="${wpcli.exec.dir}"/>
+</target>
+
+</project>]]></param>
+          <param name="build-file-path" value="build.xml" />
+          <param name="target" value="runWPCLI" />
+          <param name="teamcity.coverage.emma.include.source" value="true" />
+          <param name="teamcity.coverage.emma.instr.parameters" value="-ix -*Test*" />
+          <param name="teamcity.coverage.idea.includePatterns" value="*" />
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use-custom-build-file" value="true" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
